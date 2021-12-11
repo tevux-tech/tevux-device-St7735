@@ -12,7 +12,8 @@ var spiBus = SpiDevice.Create(spiSettings); // Ft4222Spi(new SpiConnectionSettin
 
 // Pimoroni is using 0.96" 80x160 LCD displays for their Automation and Enviro pHats.
 var lcd = new PimoroniOled(spiBus, 9);
-lcd.SetOrientation(Orientation.Rotated90);
+lcd.SetOrientation(Orientation.Rotated180);
+lcd.TurnOn();
 
 Console.WriteLine("Let's go!");
 
