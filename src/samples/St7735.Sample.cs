@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Device.Spi;
 using System.Threading;
-using Iot.Device.St7735;
+using Tevux.Device.St7735;
 
 Console.WriteLine("Hello, World!");
 
@@ -11,12 +11,13 @@ spiSettings.ClockFrequency = 12_000_000;
 var spiBus = SpiDevice.Create(spiSettings); // Ft4222Spi(new SpiConnectionSettings(0, 1) { ClockFrequency = 1_000_000, Mode = SpiMode.Mode0 });
 
 // Pimoroni is using 0.96" 80x160 LCD displays for their Automation and Enviro pHats.
-var lcd = new PimoroniOled(spiBus, 9);
+var lcd = new PimoroniLcd096(spiBus, 9);
 lcd.SetOrientation(Orientation.Rotated180);
 lcd.TurnOn();
 
 Console.WriteLine("Let's go!");
 
+// Clearing the screen.
 lcd.SetRegion(0, 0, lcd.ActualWidth, lcd.ActualHeight);
 lcd.SendBitmap(new byte[2 * lcd.ActualWidth * lcd.ActualHeight]);
 
@@ -30,6 +31,27 @@ var greenRectangleBuffer = new byte[2 * 5 * 10];
 for (var i = 0; i < 2 * 5 * 10; i += 2) {
     greenRectangleBuffer[i] = 0b00011111;
 }
+
+for (var i = 0; i < 4; i++) {
+    lcd.SetOrientation((global::Tevux.Device.St7735.Orientation)i);
+
+    lcd.SetRegion(0, 0, lcd.ActualWidth, lcd.ActualHeight);
+    lcd.SendBitmap(new byte[2 * lcd.ActualWidth * lcd.ActualHeight]);
+
+    // Painting some markers;
+    lcd.SetRegion(0, 0, 10, 5);
+    lcd.SendBitmap(whiteRectangleBuffer);
+    lcd.SetRegion(lcd.ActualWidth - 10, 0, 10, 5);
+    lcd.SendBitmap(whiteRectangleBuffer);
+
+    lcd.SetRegion(0, lcd.ActualHeight - 10, 5, 10);
+    lcd.SendBitmap(greenRectangleBuffer);
+    lcd.SetRegion(lcd.ActualWidth - 5, lcd.ActualHeight - 10, 5, 10);
+    lcd.SendBitmap(greenRectangleBuffer);
+
+    Thread.Sleep(1000);
+}
+
 
 while (true) {
     Thread.Sleep(100);

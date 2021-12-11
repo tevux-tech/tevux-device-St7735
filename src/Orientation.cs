@@ -1,4 +1,4 @@
-﻿namespace Iot.Device.St7735;
+﻿namespace Tevux.Device.St7735;
 
 /// <summary>
 /// Orientation of the display.

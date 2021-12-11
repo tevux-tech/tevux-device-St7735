@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Device.Gpio;
 using System.Device.Spi;
-using Iot.Device.St7735.Register;
+using Tevux.Device.St7735.Register;
 
-namespace Iot.Device.St7735;
+namespace Tevux.Device.St7735;
 
 /// <summary>
 /// Provides very basic access to ST7735 LCD controller.
@@ -80,11 +80,29 @@ public class ST7735 {
 
                 _offsetLeft = (byte)((_nativeNumberOfColumns - ActualWidth) / 2);
                 _offsetTop = (byte)((_nativeNumberOfRows - ActualHeight) / 2);
+                break;
 
-                SetRegion(0, 0, ActualWidth, ActualHeight);
+            case Orientation.Rotated90:
+                ActualWidth = NativeHeight;
+                ActualHeight = NativeWidth;
+
+                SetRegister(Address.MemoryDataAccessControl, 0x20 /* Row/column switch */ + 0x08 /* RGB mode */);
+
+                _offsetLeft = (byte)((_nativeNumberOfColumns - ActualWidth) / 2);
+                _offsetTop = (byte)((_nativeNumberOfRows - ActualHeight) / 2);
                 break;
 
             case Orientation.Rotated180:
+                ActualWidth = NativeWidth;
+                ActualHeight = NativeHeight;
+
+                SetRegister(Address.MemoryDataAccessControl, 0x80 /* Row order reversed */+ 0x08 /* RGB mode */);
+
+                _offsetLeft = (byte)((_nativeNumberOfColumns - ActualWidth) / 2);
+                _offsetTop = (byte)((_nativeNumberOfRows - ActualHeight) / 2);
+                break;
+
+            case Orientation.Rotated270:
                 ActualWidth = NativeHeight;
                 ActualHeight = NativeWidth;
 
@@ -92,10 +110,10 @@ public class ST7735 {
 
                 _offsetLeft = (byte)((_nativeNumberOfRows - ActualWidth) / 2);
                 _offsetTop = (byte)((_nativeNumberOfColumns - ActualHeight) / 2);
-
-                SetRegion(0, 0, ActualWidth, ActualHeight);
                 break;
         }
+
+        SetRegion(0, 0, ActualWidth, ActualHeight);
     }
 
     /// <summary>

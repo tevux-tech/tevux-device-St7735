@@ -1,4 +1,4 @@
-﻿namespace Iot.Device.St7735.Register;
+﻿namespace Tevux.Device.St7735.Register;
 
 /// <summary>
 /// Register address definitions for ST7735.
