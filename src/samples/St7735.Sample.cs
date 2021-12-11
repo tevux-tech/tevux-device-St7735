@@ -3,24 +3,25 @@ using System.Device.Spi;
 using System.Threading;
 using Tevux.Device.St7735;
 
-Console.WriteLine("Hello, World!");
-
 // Preparing SPI bus.
 var spiSettings = new SpiConnectionSettings(0, 1);
 spiSettings.ClockFrequency = 12_000_000;
 var spiBus = SpiDevice.Create(spiSettings); // Ft4222Spi(new SpiConnectionSettings(0, 1) { ClockFrequency = 1_000_000, Mode = SpiMode.Mode0 });
 
-// Pimoroni is using 0.96" 80x160 LCD displays for their Automation and Enviro pHats.
-var lcd = new PimoroniLcd096(spiBus, 9);
-lcd.SetOrientation(Orientation.Rotated180);
-lcd.TurnOn();
+// Preparing GPIO controller (nothing to prepare, actually).
+var gpioController = new System.Device.Gpio.GpioController();
 
+// Pimoroni is using 0.96" 80x160 LCD displays for their Automation and Enviro pHats.
+var lcd = new ST7735();
+lcd.InitializeAsPimoroniEnviro(spiBus, gpioController);
+
+// Hardware is now initialized.
 Console.WriteLine("Let's go!");
 
 // Clearing the screen.
-lcd.SetRegion(0, 0, lcd.ActualWidth, lcd.ActualHeight);
-lcd.SendBitmap(new byte[2 * lcd.ActualWidth * lcd.ActualHeight]);
+lcd.Clear();
 
+// Preparing some buffers that will be heavily reused later.
 var randomNumber = new Random();
 var whiteRectangleBuffer = new byte[2 * 10 * 5];
 for (var i = 0; i < 2 * 10 * 5; i++) {
@@ -35,8 +36,7 @@ for (var i = 0; i < 2 * 5 * 10; i += 2) {
 for (var i = 0; i < 4; i++) {
     lcd.SetOrientation((global::Tevux.Device.St7735.Orientation)i);
 
-    lcd.SetRegion(0, 0, lcd.ActualWidth, lcd.ActualHeight);
-    lcd.SendBitmap(new byte[2 * lcd.ActualWidth * lcd.ActualHeight]);
+    lcd.Clear();
 
     // Painting some markers;
     lcd.SetRegion(0, 0, 10, 5);
@@ -53,6 +53,7 @@ for (var i = 0; i < 4; i++) {
 }
 
 
+// Unleash the demo! Painting random rectangles all over the screen.
 while (true) {
     Thread.Sleep(100);
 

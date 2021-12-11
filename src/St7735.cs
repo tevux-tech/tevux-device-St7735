@@ -12,15 +12,17 @@ public class ST7735 {
     private const byte _nativeNumberOfColumns = 132;
     private const byte _nativeNumberOfRows = 162;
 
-    private readonly SpiDevice _spi;
-    private readonly GpioController _gpio = new();
-    private readonly int _controlPin;
-    private readonly int _backlightPin = 12;
+    private SpiDevice _spi;
+    private GpioController _gpioDriver;
+    private int _controlPin;
+    private int _backlightPin = 12;
 
     private readonly byte[] _buffer1 = new byte[1];
 
     private byte _offsetLeft;
     private byte _offsetTop;
+
+    private bool _isInitialized = false;
 
     /// <summary>
     /// Native width of the LCD display.This depends on the LCD matrix that is connected to ST7735 controller.
@@ -50,18 +52,8 @@ public class ST7735 {
     /// <summary>
     /// TODO
     /// </summary>
-    public ST7735(SpiDevice spiDevice, int controlPin, int nativeWidth, int nativeHeight) {
-        _spi = spiDevice;
+    public ST7735() {
 
-        _controlPin = controlPin;
-
-        NativeWidth = nativeWidth;
-        NativeHeight = nativeHeight;
-
-        _gpio.OpenPin(_controlPin, PinMode.Output);
-        _gpio.OpenPin(_backlightPin, PinMode.Output);
-
-        Initialize();
     }
 
     /// <summary>
@@ -69,6 +61,8 @@ public class ST7735 {
     /// </summary>
     /// <param name="orientation">TODO</param>
     public void SetOrientation(Orientation orientation) {
+        ThrowIfNotInitialized();
+
         Orientation = orientation;
 
         switch (Orientation) {
@@ -117,9 +111,24 @@ public class ST7735 {
     }
 
     /// <summary>
-    /// TODO
+    /// Initializes hardware. Needs to be done before doing anything else.
     /// </summary>
-    public virtual void Initialize() {
+    public virtual void Initialize(SpiDevice spiDevice, GpioController gpioDriver, int controlPin, int backlightPin, int nativeWidth, int nativeHeight) {
+        // TODO: check for nulls.
+
+        _spi = spiDevice;
+        _gpioDriver = gpioDriver;
+
+        _controlPin = controlPin;
+        _backlightPin = backlightPin;
+
+        NativeWidth = nativeWidth;
+        NativeHeight = nativeHeight;
+
+        _gpioDriver.OpenPin(_controlPin, PinMode.Output);
+        _gpioDriver.OpenPin(_backlightPin, PinMode.Output);
+
+        _isInitialized = true;
     }
 
     /// <summary>
@@ -127,8 +136,10 @@ public class ST7735 {
     /// </summary>
     /// <param name="register">Address of the register.</param>
     public void SetRegister(Address register) {
+        ThrowIfNotInitialized();
+
         _buffer1[0] = (byte)register;
-        _gpio.Write(_controlPin, PinValue.Low);
+        _gpioDriver.Write(_controlPin, PinValue.Low);
         _spi.Write(_buffer1);
     }
 
@@ -138,12 +149,14 @@ public class ST7735 {
     /// <param name="register">Address of the register.</param>
     /// <param name="value">Value of the register.</param>
     public void SetRegister(Address register, byte value) {
+        ThrowIfNotInitialized();
+
         _buffer1[0] = (byte)register;
-        _gpio.Write(_controlPin, PinValue.Low);
+        _gpioDriver.Write(_controlPin, PinValue.Low);
         _spi.Write(_buffer1);
 
         _buffer1[0] = value;
-        _gpio.Write(_controlPin, PinValue.High);
+        _gpioDriver.Write(_controlPin, PinValue.High);
         _spi.Write(_buffer1);
     }
 
@@ -153,16 +166,18 @@ public class ST7735 {
     /// <param name="register">Address of the register.</param>
     /// <param name="value">Value of the register.</param>
     public void SetRegister(Address register, byte[] value) {
+        ThrowIfNotInitialized();
+
         var valueSpan = new Span<byte>(value);
 
         var bytesSent = 0;
 
         _buffer1[0] = (byte)register;
 
-        _gpio.Write(_controlPin, PinValue.Low);
+        _gpioDriver.Write(_controlPin, PinValue.Low);
         _spi.Write(_buffer1);
 
-        _gpio.Write(_controlPin, PinValue.High);
+        _gpioDriver.Write(_controlPin, PinValue.High);
         while (bytesSent < value.Length) {
             if (value.Length - bytesSent > 4096) {
                 _spi.Write(valueSpan.Slice(bytesSent, 4096));
@@ -179,14 +194,18 @@ public class ST7735 {
     /// Turns on the display.
     /// </summary>
     public void TurnOn() {
-        _gpio.Write(_backlightPin, PinValue.High);
+        ThrowIfNotInitialized();
+
+        _gpioDriver.Write(_backlightPin, PinValue.High);
     }
 
     /// <summary>
     /// Turns off the display.
     /// </summary>
     public void TurnOff() {
-        _gpio.Write(_backlightPin, PinValue.Low);
+        ThrowIfNotInitialized();
+
+        _gpioDriver.Write(_backlightPin, PinValue.Low);
     }
 
     /// <summary>
@@ -197,6 +216,8 @@ public class ST7735 {
     /// <param name="width">Width of the clip region.</param>
     /// <param name="height">Height of the clip region.</param>
     public void SetRegion(int x, int y, int width, int height) {
+        ThrowIfNotInitialized();
+
         var x0 = x + _offsetLeft;
         var x1 = x + width - 1 + _offsetLeft;
         SetRegister(Address.ColumnAddressSet, new byte[] { (byte)(x0 >> 8), (byte)x0, (byte)(x1 >> 8), (byte)x1 });
@@ -211,10 +232,25 @@ public class ST7735 {
     /// </summary>
     /// <param name="data">TODO</param>
     public void SendBitmap(byte[] data) {
+        ThrowIfNotInitialized();
+
         if (data == null) {
             throw new ArgumentNullException(nameof(data));
         }
 
         SetRegister(Address.MemoryWrite, data);
+    }
+
+    public void Clear() {
+        ThrowIfNotInitialized();
+
+        SetRegion(0, 0, ActualWidth, ActualHeight);
+        SendBitmap(new byte[2 * ActualWidth * ActualHeight]);
+    }
+
+    private void ThrowIfNotInitialized() {
+        if (_isInitialized == false) {
+            throw new InvalidOperationException($"Hardware is not initialized. Call {nameof(Initialize)} method first, or use provided extensions methods.");
+        }
     }
 }
