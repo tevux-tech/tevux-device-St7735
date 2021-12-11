@@ -1,28 +1,56 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>net6.0</TargetFrameworks>
-    <!--Disabling default items so samples source won't get build by the main library-->
-    <EnableDefaultItems>false</EnableDefaultItems>
-    <LangVersion>9</LangVersion>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>net6.0</TargetFrameworks>
+		<!--Disabling default items so samples source won't get build by the main library-->
+		<EnableDefaultItems>false</EnableDefaultItems>
+		<LangVersion>9</LangVersion>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<AssemblyName>Tevux.Device.St7735</AssemblyName>
+		<RootNamespace>Tevux.Device.St7735</RootNamespace>
+		<Authors>devbotas</Authors>
+		<Company>Tevux Technologies</Company>
+		<Description>Basic library that allows controlling ST7735-based LCDs using System.Device.Gpio library.</Description>
+		<Copyright>(c) 2021 Tevux Technologies</Copyright>
+		<PackageProjectUrl>https://github.com/tevux-tech/tevux-device-st7735</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/tevux-tech/tevux-device-st7735</RepositoryUrl>
+		<PackageTags>c#; iot; st7735; lcd;</PackageTags>
+		<Version>0.9.0</Version>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0|AnyCPU'">
-    <LangVersion>10.0</LangVersion>
-  </PropertyGroup>
+	<!--Configuring source Link-->
+	<PropertyGroup>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<DebugType>embedded</DebugType>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+	</ItemGroup>
+	<PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+		<!--This enables "deterministic builds"-->
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+	</PropertyGroup>
+	<!--End of Configuring source Link-->
 
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0|AnyCPU'">
-    <LangVersion>10.0</LangVersion>
-  </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0|AnyCPU'">
+		<LangVersion>10.0</LangVersion>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="*.cs" />
-    <Compile Remove="Color.cs" />
-    <Compile Remove="Graphics.cs" />
-  </ItemGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0|AnyCPU'">
+		<LangVersion>10.0</LangVersion>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="1.5.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Include="*.cs" />
+		<Compile Remove="Color.cs" />
+		<Compile Remove="Graphics.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="System.Device.Gpio" Version="1.5.0" />
+	</ItemGroup>
 
 </Project>
