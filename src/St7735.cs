@@ -86,17 +86,17 @@ public class ST7735 {
                 ActualWidth = NativeHeight;
                 ActualHeight = NativeWidth;
 
-                SetRegister(Address.MemoryDataAccessControl, 0x20 /* Row/column switch */ + 0x08 /* RGB mode */);
+                SetRegister(Address.MemoryDataAccessControl, 0x40 /* Column order reversed */+ 0x20 /* Row/column switch */ + 0x08 /* RGB mode */);
 
-                _offsetLeft = (byte)((_nativeNumberOfColumns - ActualWidth) / 2);
-                _offsetTop = (byte)((_nativeNumberOfRows - ActualHeight) / 2);
+                _offsetLeft = (byte)((_nativeNumberOfRows - ActualWidth) / 2);
+                _offsetTop = (byte)((_nativeNumberOfColumns - ActualHeight) / 2);
                 break;
 
             case Orientation.Rotated180:
                 ActualWidth = NativeWidth;
                 ActualHeight = NativeHeight;
 
-                SetRegister(Address.MemoryDataAccessControl, 0x80 /* Row order reversed */+ 0x08 /* RGB mode */);
+                SetRegister(Address.MemoryDataAccessControl, 0x80 /* Row order reversed */+ 0x40 /* Column order reversed */ + 0x08 /* RGB mode */);
 
                 _offsetLeft = (byte)((_nativeNumberOfColumns - ActualWidth) / 2);
                 _offsetTop = (byte)((_nativeNumberOfRows - ActualHeight) / 2);
