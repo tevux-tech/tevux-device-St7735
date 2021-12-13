@@ -15,7 +15,7 @@
 		<PackageProjectUrl>https://github.com/tevux-tech/tevux-device-st7735</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/tevux-tech/tevux-device-st7735</RepositoryUrl>
 		<PackageTags>c#; iot; st7735; lcd;</PackageTags>
-		<Version>0.9.0-preview.1</Version>
+		<Version>0.9.0-preview.2</Version>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 	</PropertyGroup>
