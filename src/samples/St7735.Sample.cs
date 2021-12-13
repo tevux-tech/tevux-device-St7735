@@ -61,6 +61,9 @@ while (true) {
 }
 
 public static class SixLaborsExtensions {
+    /// <summary>
+    /// Extension method to transcode SixLabors image representation to byte array that is supported by ST7735.
+    /// </summary>
     public static byte[] ToBgr565Array(this Image<Bgr565> image) {
         var returnArray = new byte[image.Width * image.Height * 2];
         for (var j = 0; j < image.Height; j++) {
